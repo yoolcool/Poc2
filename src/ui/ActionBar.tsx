@@ -13,7 +13,7 @@ export function ActionBar({ mode, zoneDepth, onEnterZone, onExitZone, onDepthCha
     return (
       <div className="action-bar">
         <button className="action-btn action-btn--enter" onClick={onEnterZone}>
-          Enter Zone
+          진입
         </button>
       </div>
     );
@@ -24,18 +24,17 @@ export function ActionBar({ mode, zoneDepth, onEnterZone, onExitZone, onDepthCha
   return (
     <div className="action-bar">
       <button className="action-btn action-btn--back" onClick={onExitZone}>
-        ← Back
+        ← 뒤로
       </button>
-      <span className="action-depth">Depth {depth}</span>
       <button className="action-btn" onClick={() => onDepthChange(1)}>
-        Depth +
+        심도 +
       </button>
       <button
         className="action-btn"
         onClick={() => onDepthChange(-1)}
         disabled={depth <= 0}
       >
-        Depth −
+        심도 −
       </button>
     </div>
   );

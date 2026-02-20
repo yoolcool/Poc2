@@ -125,15 +125,13 @@ export function BottomPanel({
           <span className="bp-summary">
             {mode === 'zone' && zone ? (
               <>
-                <span className="bp-summary__item">Zone {zone.id}</span>
+                <span className="bp-summary__item">존 탐색 중</span>
                 <span className="bp-summary__sep">|</span>
-                <span className="bp-summary__item">({zoneCursorX},{zoneCursorY})</span>
+                <span className={`bp-summary__item ${biomeClass}`}>{cell.biome}</span>
               </>
             ) : (
               <>
                 <span className="bp-summary__item">시드 {seed}</span>
-                <span className="bp-summary__sep">|</span>
-                <span className="bp-summary__item">({cursorX},{cursorY})</span>
                 <span className="bp-summary__sep">|</span>
                 <span className={`bp-summary__item ${biomeClass}`}>{cell.biome}</span>
               </>

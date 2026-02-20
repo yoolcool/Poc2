@@ -435,6 +435,7 @@
   border-top: 1px solid #333;
   overflow: hidden;
   /* height set by inline style from BottomPanel component */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Handle bar — draggable resize strip */
@@ -542,7 +543,8 @@
   align-items: center;
   justify-content: center;
   border-left: 1px solid #1e1e1e;
-  padding: 4px 2px;
+  padding: 4px max(2px, env(safe-area-inset-right, 0px));
+  padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
   flex-shrink: 0;
 }
 
@@ -565,7 +567,7 @@
    ===================================================================== */
 @media (max-width: 900px) {
   .app {
-    padding: 0.2rem 0.3rem;
+    padding: 0.2rem max(0.3rem, env(safe-area-inset-right, 0px)) 0 max(0.3rem, env(safe-area-inset-left, 0px));
     gap: 0.15rem;
   }
 
