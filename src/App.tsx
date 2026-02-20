@@ -132,14 +132,15 @@ export default function App() {
     setZoneOrigin({ ox: cursorX, oy: cursorY, depth: 0 });
     setZoneCursor({ x: Math.floor(ZONE_W / 2), y: Math.floor(ZONE_H / 2) });
     setMode('zone');
-    addLog('system', `Zone 진입 (${cursorX},${cursorY} 깊이 0)`);
+    addLog('system', '존으로 진입합니다.');
+    if (import.meta.env.DEV) console.log(`[Zone] enter (${cursorX},${cursorY}) depth=0`);
   }, [cursorX, cursorY, addLog]);
 
   const exitZone = useCallback(() => {
     setMode('overworld');
     setZone(null);
     setZoneOrigin(null);
-    addLog('system', 'Overworld로 복귀');
+    addLog('system', '오버월드로 복귀합니다.');
   }, [addLog]);
 
   const changeDepth = useCallback((delta: number) => {
@@ -155,7 +156,8 @@ export default function App() {
     setZone(newZone);
     setZoneOrigin({ ...zoneOrigin, depth: newDepth });
     setZoneCursor({ x: Math.floor(ZONE_W / 2), y: Math.floor(ZONE_H / 2) });
-    addLog('system', `Depth → ${newDepth}`);
+    addLog('system', `심도가 변경되었습니다.`);
+    if (import.meta.env.DEV) console.log(`[Zone] depth → ${newDepth}`);
   }, [zoneOrigin, addLog]);
 
   // ---- Tick timer --------------------------------------------------------
