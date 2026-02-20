@@ -14,11 +14,13 @@ type Props = {
 /** Legend entries: [cssClass, glyph, label] */
 const LEGEND: [string, string, string][] = [
   ['tile-water',          '~', 'water'],
+  ['tile-beach',          ':', 'beach'],
   ['tile-rocky-mountain', '^', 'rocky mountain'],
   ['tile-alpine',         'A', 'alpine'],
   ['tile-desert',         '.', 'desert'],
   ['tile-plains',         ',', 'plains'],
   ['tile-forest',         'T', 'forest'],
+  ['tile-swamp',          '"', 'swamp'],
   ['tile-player',         '@', 'cursor'],
 ];
 

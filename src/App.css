@@ -263,6 +263,46 @@
 .tile-desert         { color: #FBC02D; }
 .tile-plains         { color: #9CCC65; }
 .tile-forest         { color: #2E7D32; }
+.tile-beach          { color: #FFE082; }
+.tile-swamp          { color: #6D8764; }
+
+/* ---- Height layer ---- */
+.tile-h-deep   { color: #0D47A1; }
+.tile-h-ocean  { color: #1565C0; }
+.tile-h-shore  { color: #42A5F5; }
+.tile-h-low    { color: #66BB6A; }
+.tile-h-mid    { color: #A5D6A7; }
+.tile-h-high   { color: #8D6E63; }
+.tile-h-mount  { color: #BDBDBD; }
+.tile-h-peak   { color: #F5F5F5; }
+
+/* ---- River layer ---- */
+.tile-r-ocean  { color: #1565C0; }
+.tile-r-river  { color: #00E5FF; font-weight: bold; }
+.tile-r-lake   { color: #00BCD4; font-weight: bold; }
+.tile-r-land   { color: #424242; }
+.tile-r-mount  { color: #757575; }
+
+/* ---- Layer toggle buttons ---- */
+.layer-toggle {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 0.3rem;
+}
+
+.layer-btn {
+  padding: 0.15rem 0.45rem;
+  font-size: 0.72rem;
+  border: 1px solid #333;
+  border-radius: 3px;
+  background-color: #111;
+  color: #777;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 80ms, color 80ms;
+}
+.layer-btn:hover { background-color: #1e1e1e; color: #aaa; }
+.layer-btn--active { border-color: #558; color: #ccc; background-color: #1a1a2e; }
 
 .tile-player {
   color: #FF5252;

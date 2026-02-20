@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { generateOverworld, serializeOverworld } from './world/overworld';
-import type { Overworld } from './world/types';
+import { serializeOverworld } from './world/overworld';
+import type { Overworld, OverworldCell } from './world/types';
+import { runWorldGenV2 } from './world/gen/v2/pipeline';
+import type { WorldGenV2Result } from './world/gen/v2/types';
 import { spawnEntities, tickEntities, ENTITY_GLYPH } from './world/entities';
 import type { Entity } from './world/entities';
 import { updateProximity } from './world/simulation';
@@ -24,8 +26,22 @@ const WORLD_WIDTH  = 80;
 const WORLD_HEIGHT = 40;
 const TICK_INTERVAL_MS = 1000;
 
-function buildWorld(seed: number): Overworld {
-  return generateOverworld(seed, WORLD_WIDTH, WORLD_HEIGHT);
+export type MapLayer = 'biome' | 'height' | 'rivers';
+
+/** Build an Overworld + v2 raw data from the v2 pipeline. */
+function buildWorldV2(seed: number): { world: Overworld; v2: WorldGenV2Result } {
+  const v2 = runWorldGenV2(seed, { width: WORLD_WIDTH, height: WORLD_HEIGHT });
+  const cells: OverworldCell[] = [];
+  for (let y = 0; y < WORLD_HEIGHT; y++) {
+    for (let x = 0; x < WORLD_WIDTH; x++) {
+      cells.push({
+        height: v2.heightMap[y][x],
+        moisture: v2.moisture[y][x],
+        biome: v2.biomeMap[y][x],
+      });
+    }
+  }
+  return { world: { width: WORLD_WIDTH, height: WORLD_HEIGHT, cells }, v2 };
 }
 
 function simpleHash(s: string): number {
@@ -43,19 +59,54 @@ const INITIAL_SEED = 12345;
 const ZONE_W = 80;
 const ZONE_H = 25;
 
+// ---- Height-layer glyph/class helpers -----------------------------------
+
+function heightGlyph(h: number): string {
+  if (h < 0.10) return ' ';
+  if (h < 0.25) return '~';
+  if (h < 0.35) return '.';
+  if (h < 0.50) return '-';
+  if (h < 0.65) return '=';
+  if (h < 0.78) return '#';
+  return '^';
+}
+
+function heightClass(h: number): string {
+  if (h < 0.10) return 'tile-h-deep';
+  if (h < 0.25) return 'tile-h-ocean';
+  if (h < 0.35) return 'tile-h-shore';
+  if (h < 0.50) return 'tile-h-low';
+  if (h < 0.65) return 'tile-h-mid';
+  if (h < 0.78) return 'tile-h-high';
+  if (h < 0.88) return 'tile-h-mount';
+  return 'tile-h-peak';
+}
+
+// ---- Initial build (run once) -------------------------------------------
+
+const initialBuild = buildWorldV2(INITIAL_SEED);
+
 export default function App() {
   const [seed, setSeed]           = useState<number>(INITIAL_SEED);
   const [inputSeed, setInputSeed] = useState<string>(String(INITIAL_SEED));
-  const [world, setWorld]         = useState<Overworld>(() => buildWorld(INITIAL_SEED));
+  const [world, setWorld]         = useState<Overworld>(() => initialBuild.world);
+  const [v2Data, setV2Data]       = useState<WorldGenV2Result>(() => initialBuild.v2);
   const [cursorX, setCursorX]     = useState(0);
   const [cursorY, setCursorY]     = useState(0);
   const [entities, setEntities]   = useState<Entity[]>(() =>
-    spawnEntities(INITIAL_SEED, buildWorld(INITIAL_SEED)),
+    spawnEntities(INITIAL_SEED, initialBuild.world),
   );
   const [tick, setTick]   = useState(0);
   const [logs, setLogs]   = useState<SimEvent[]>([]);
 
-  // ---- Zone state ---------------------------------------------------------
+  // ---- Map layer toggle -------------------------------------------------
+  const [mapLayer, setMapLayer] = useState<MapLayer>('biome');
+  const mapLayerRef = useRef(mapLayer);
+  useEffect(() => { mapLayerRef.current = mapLayer; }, [mapLayer]);
+  const v2Ref = useRef(v2Data);
+  useEffect(() => { v2Ref.current = v2Data; }, [v2Data]);
+
+  // ---- Zone state -------------------------------------------------------
   const [mode, setMode]         = useState<ViewMode>('overworld');
   const [zone, setZone]         = useState<Zone | null>(null);
   const [zoneCursor, setZoneCursor] = useState({ x: 0, y: 0 });
@@ -89,12 +140,13 @@ export default function App() {
     });
   }, []);
 
-  // ---- Regenerate world --------------------------------------------------
+  // ---- Regenerate world ------------------------------------------------
   const regenerate = useCallback((newSeed: number) => {
-    const w = buildWorld(newSeed);
+    const { world: w, v2 } = buildWorldV2(newSeed);
     const ents = spawnEntities(newSeed, w);
     setSeed(newSeed);
     setWorld(w);
+    setV2Data(v2);
     setCursorX(0);
     setCursorY(0);
     setEntities(ents);
@@ -104,7 +156,9 @@ export default function App() {
     nearStateRef.current = new Map();
     narrationStateRef.current = initNarration(newSeed);
     const hash = simpleHash(serializeOverworld(w));
-    console.log(`[World] seed=${newSeed}  hash=0x${hash.toString(16).padStart(8, '0')}`);
+    if (import.meta.env.DEV) {
+      console.log(`[World] seed=${newSeed}  hash=0x${hash.toString(16).padStart(8, '0')}`);
+    }
     addLog('system', `세계가 생성되었습니다. (시드: ${newSeed})`);
   }, [addLog]);
 
@@ -121,7 +175,7 @@ export default function App() {
     regenerate(s);
   }, [regenerate]);
 
-  // ---- Zone actions -------------------------------------------------------
+  // ---- Zone actions -----------------------------------------------------
   const enterZone = useCallback(() => {
     const cell = worldRef.current.cells[cursorY * worldRef.current.width + cursorX];
     const newZone = generateZone({
@@ -161,17 +215,13 @@ export default function App() {
     if (import.meta.env.DEV) console.log(`[Zone] depth → ${newDepth}`);
   }, [zoneOrigin, addLog]);
 
-  // ---- Tick timer --------------------------------------------------------
+  // ---- Tick timer -------------------------------------------------------
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), TICK_INTERVAL_MS);
     return () => clearInterval(id);
   }, []);
 
-  // ---- Entity tick -------------------------------------------------------
-  // Proximity is NOT checked here — only cursor movement triggers encounter
-  // messages. Checking in both places was causing the wasNear flag to be set
-  // before the player moved, making enteredNear always false in the cursor
-  // effect (the root cause of the NPC-message bug).
+  // ---- Entity tick ------------------------------------------------------
   useEffect(() => {
     if (tick === 0) return;
     const next = tickEntities(entitiesRef.current, seedRef.current, tick, world);
@@ -180,7 +230,7 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick, world]);
 
-  // ---- Cursor movement (mode-aware) --------------------------------------
+  // ---- Cursor movement (mode-aware) ------------------------------------
   const modeRef = useRef(mode);
   useEffect(() => { modeRef.current = mode; }, [mode]);
   const zoneRef = useRef(zone);
@@ -203,7 +253,7 @@ export default function App() {
     [world.width, world.height],
   );
 
-  // ---- Cell tap: moves cursor to the tapped cell (replaces onSetCursor) ---
+  // ---- Cell tap ---------------------------------------------------------
   const handleCellTap = useCallback(
     (x: number, y: number) => {
       if (modeRef.current === 'zone') {
@@ -221,8 +271,7 @@ export default function App() {
     [world.width, world.height],
   );
 
-  // ---- Grid adapters: callback-based (glyphAt / classAt) ------------------
-  // Pre-compute entity lookup map so glyphAt is O(1) per cell.
+  // ---- Grid adapters: callback-based (glyphAt / classAt) ----------------
   const entityAt = useMemo(() => {
     const map = new Map<number, Entity>();
     for (const e of entities) map.set(e.y * world.width + e.x, e);
@@ -235,6 +284,23 @@ export default function App() {
       if (!z) return ' ';
       return z.tiles[y * z.width + x]?.glyph ?? ' ';
     }
+
+    const layer = mapLayerRef.current;
+    const d = v2Ref.current;
+
+    if (layer === 'height' && d) {
+      return heightGlyph(d.heightMap[y][x]);
+    }
+
+    if (layer === 'rivers' && d) {
+      if (d.riverMap.lake[y][x]) return 'o';
+      if (d.riverMap.river[y][x]) return '~';
+      if (d.heightMap[y][x] < d.seaLevel) return '~';
+      if (d.heightMap[y][x] > 0.70) return '^';
+      return '.';
+    }
+
+    // Default: biome layer
     const entity = entityAt.get(y * world.width + x);
     if (entity) return ENTITY_GLYPH[entity.kind];
     return BIOME_CHAR[world.cells[y * world.width + x]?.biome] ?? '?';
@@ -247,6 +313,23 @@ export default function App() {
       const tile = z.tiles[y * z.width + x];
       return tile ? `tile-zone tile-zone--${tile.kind}` : undefined;
     }
+
+    const layer = mapLayerRef.current;
+    const d = v2Ref.current;
+
+    if (layer === 'height' && d) {
+      return heightClass(d.heightMap[y][x]);
+    }
+
+    if (layer === 'rivers' && d) {
+      if (d.riverMap.lake[y][x]) return 'tile-r-lake';
+      if (d.riverMap.river[y][x]) return 'tile-r-river';
+      if (d.heightMap[y][x] < d.seaLevel) return 'tile-r-ocean';
+      if (d.heightMap[y][x] > 0.70) return 'tile-r-mount';
+      return 'tile-r-land';
+    }
+
+    // Default: biome layer
     const entity = entityAt.get(y * world.width + x);
     if (entity) return `tile-entity tile-entity--${entity.kind}`;
     return BIOME_CLASS[world.cells[y * world.width + x]?.biome] ?? undefined;
@@ -290,6 +373,22 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cursorX, cursorY, mode, tick, seed, addLog]);
 
+  // ---- Layer toggle buttons ---------------------------------------------
+  const layerButtons = (
+    <span className="layer-toggle">
+      {(['biome', 'height', 'rivers'] as MapLayer[]).map((l) => (
+        <button
+          key={l}
+          className={`layer-btn${mapLayer === l ? ' layer-btn--active' : ''}`}
+          onClick={() => setMapLayer(l)}
+          disabled={mode === 'zone'}
+        >
+          {l === 'biome' ? '지형' : l === 'height' ? '고도' : '강'}
+        </button>
+      ))}
+    </span>
+  );
+
   return (
     <div className="app">
       {/* ── Toolbar ──────────────────────────────────────────────────────── */}
@@ -310,6 +409,8 @@ export default function App() {
         />
         <button onClick={handleGenerate} disabled={mode === 'zone'}>Generate</button>
         <button onClick={handleRandom}   disabled={mode === 'zone'}>Random</button>
+        {/* Layer toggle */}
+        {layerButtons}
         {/* Action bar — desktop only (BottomPanel shows it on mobile) */}
         <span className="toolbar-sep" />
         <ActionBar
