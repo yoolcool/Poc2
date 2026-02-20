@@ -40,6 +40,8 @@ const BIOME_TO_TAG: Record<string, string> = {
   plains:         'plains',
   rocky_mountain: 'mountain',
   alpine:         'mountain',
+  beach:          'water',
+  swamp:          'water',
 };
 
 // ---------------------------------------------------------------------------

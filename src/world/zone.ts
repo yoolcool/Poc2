@@ -122,6 +122,8 @@ const BIOME_WEIGHTS: Record<Biome, WeightTable> = {
   water:         [['shallow_water', 80], ['mud', 15], ['reed', 5]],
   rocky_mountain:[['rock', 55], ['cliff', 25], ['dirt', 20]],
   alpine:        [['snow', 55], ['rock', 30], ['cliff', 10], ['dirt', 5]],
+  beach:         [['sand', 70], ['gravel', 15], ['shallow_water', 10], ['mud', 5]],
+  swamp:         [['mud', 35], ['shallow_water', 25], ['reed', 20], ['tall_grass', 15], ['dirt', 5]],
 };
 
 // ---------------------------------------------------------------------------

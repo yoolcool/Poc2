@@ -5,7 +5,9 @@ export type Biome =
   | 'alpine'
   | 'desert'
   | 'plains'
-  | 'forest';
+  | 'forest'
+  | 'beach'
+  | 'swamp';
 
 /** A single cell in the overworld grid */
 export type OverworldCell = {

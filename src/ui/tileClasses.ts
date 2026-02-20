@@ -8,6 +8,8 @@ export const BIOME_CHAR: Record<Biome, string> = {
   desert:         '.',
   plains:         ',',
   forest:         'T',
+  beach:          ':',
+  swamp:          '"',
 };
 
 /**
@@ -21,6 +23,8 @@ export const BIOME_CLASS: Record<Biome, string> = {
   desert:         'tile-desert',
   plains:         'tile-plains',
   forest:         'tile-forest',
+  beach:          'tile-beach',
+  swamp:          'tile-swamp',
 };
 
 /**
