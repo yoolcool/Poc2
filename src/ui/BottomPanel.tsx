@@ -5,7 +5,6 @@ import type { SimEvent } from '../world/simulation';
 import { ConsoleLog } from './ConsoleLog';
 import { Inspector } from './Inspector';
 import { ZoneInspector } from './ZoneInspector';
-import { TouchPad } from './TouchPad';
 import { ActionBar } from './ActionBar';
 import type { ViewMode } from './ActionBar';
 import { BIOME_CLASS } from './tileClasses';
@@ -44,7 +43,6 @@ type Props = {
   cursorX: number;
   cursorY: number;
   events: SimEvent[];
-  onMoveCursor: (dx: number, dy: number) => void;
   // Zone mode
   mode: ViewMode;
   zone: Zone | null;
@@ -56,7 +54,7 @@ type Props = {
 };
 
 export function BottomPanel({
-  world, seed, cursorX, cursorY, events, onMoveCursor,
+  world, seed, cursorX, cursorY, events,
   mode, zone, zoneCursorX, zoneCursorY,
   onEnterZone, onExitZone, onDepthChange,
 }: Props) {
@@ -168,10 +166,9 @@ export function BottomPanel({
         </div>
       )}
 
-      {/* ── Content: two-column grid (left: info, right: D-pad) ──────────── */}
+      {/* ── Content: console or inspector ────────────────────────────────── */}
       {!isCollapsed && (
         <div className="bp-content">
-          {/* Left: console or inspector */}
           <div className="bp-left">
             {activeTab === 'console' ? (
               <ConsoleLog events={events} />
@@ -194,11 +191,6 @@ export function BottomPanel({
                 )}
               </div>
             )}
-          </div>
-
-          {/* Right: D-pad — never overlaps the map */}
-          <div className="bp-dpad-col" onPointerDown={stopProp}>
-            <TouchPad onMoveCursor={onMoveCursor} />
           </div>
         </div>
       )}

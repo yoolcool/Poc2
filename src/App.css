@@ -500,12 +500,12 @@
 .bp-tab:hover       { background-color: #1e1e1e; color: #aaa; }
 .bp-tab--active     { border-color: #556; color: #ccc; background-color: #1a1a2a; }
 
-/* ---- Content grid: 2 columns ----------------------------------------- */
+/* ---- Content area ------------------------------------------------------- */
 .bp-content {
   flex: 1;
   min-height: 0;
-  display: grid;
-  grid-template-columns: 1fr 156px;  /* left: console/inspector  right: D-pad */
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -537,19 +537,23 @@
   min-width: 0;
 }
 
-/* Right column: D-pad */
-.bp-dpad-col {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-left: 1px solid #1e1e1e;
-  padding: 4px max(2px, env(safe-area-inset-right, 0px));
-  padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
-  flex-shrink: 0;
+/* =====================================================================
+   D-pad — fixed overlay at bottom-right (mobile only, hidden on desktop)
+   ===================================================================== */
+.dpad-fixed {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right, 0px));
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  z-index: 100;
+  pointer-events: auto;
+  /* Semi-transparent backdrop so buttons are readable over content */
+  background: rgba(10, 10, 10, 0.85);
+  border-radius: 12px;
+  padding: 6px;
+  border: 1px solid #333;
 }
 
-/* D-pad inside panel: slightly smaller to fit 156px column comfortably */
-.bp-dpad-col .dpad-btn {
+.dpad-fixed .dpad-btn {
   width: 46px;
   height: 46px;
   font-size: 1.1rem;
@@ -560,6 +564,7 @@
    ===================================================================== */
 @media (min-width: 901px) {
   .bottom-panel { display: none; }
+  .dpad-fixed   { display: none; }
 }
 
 /* =====================================================================

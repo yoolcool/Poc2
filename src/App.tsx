@@ -16,6 +16,7 @@ import { ActionBar } from './ui/ActionBar';
 import type { ViewMode } from './ui/ActionBar';
 import { ConsoleLog } from './ui/ConsoleLog';
 import { BottomPanel } from './ui/BottomPanel';
+import { TouchPad } from './ui/TouchPad';
 import { BIOME_CHAR, BIOME_CLASS } from './ui/tileClasses';
 import './App.css';
 
@@ -355,7 +356,6 @@ export default function App() {
         cursorX={cursorX}
         cursorY={cursorY}
         events={logs}
-        onMoveCursor={handleMoveCursor}
         mode={mode}
         zone={zone}
         zoneCursorX={zoneCursor.x}
@@ -364,6 +364,11 @@ export default function App() {
         onExitZone={exitZone}
         onDepthChange={changeDepth}
       />
+
+      {/* D-pad — fixed overlay at bottom-right, mobile only */}
+      <div className="dpad-fixed">
+        <TouchPad onMoveCursor={handleMoveCursor} />
+      </div>
     </div>
   );
 }

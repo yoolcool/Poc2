@@ -9,7 +9,7 @@ export type SimEvent = {
 };
 
 /** Per-entity proximity state tracked across ticks. */
-export type EntityNearRecord = { wasNear: boolean; lastSpokeAt: number };
+export type EntityNearRecord = { wasNear: boolean; lastSpokeAt: number; hasMetPlayer: boolean };
 /** Map from entity id → proximity record. */
 export type NearStateMap = Map<number, EntityNearRecord>;
 
@@ -103,12 +103,12 @@ export function updateProximity(
   for (const e of entities) {
     const dist = chebyshev(cursorX, cursorY, e.x, e.y);
     const isNearNow = dist <= NEAR_RADIUS;
-    const prev = nearState.get(e.id) ?? { wasNear: false, lastSpokeAt: -999 };
+    const prev = nearState.get(e.id) ?? { wasNear: false, lastSpokeAt: -999, hasMetPlayer: false };
 
     const enteredNear = !prev.wasNear && isNearNow;
 
     // Update wasNear regardless of whether we speak.
-    nearState.set(e.id, { wasNear: isNearNow, lastSpokeAt: prev.lastSpokeAt });
+    nearState.set(e.id, { wasNear: isNearNow, lastSpokeAt: prev.lastSpokeAt, hasMetPlayer: prev.hasMetPlayer });
 
     if (DEBUG_PROXIMITY && isNearNow) {
       const cooldownOk = tick - prev.lastSpokeAt >= COOLDOWN_TICKS;
@@ -116,20 +116,21 @@ export function updateProximity(
       console.log(
         `[DEBUG] entity ${e.kind}-${e.id} dist=${dist}` +
         ` enteredNear=${enteredNear} wasNear=${prev.wasNear}` +
-        ` cooldownOk=${cooldownOk}` +
+        ` cooldownOk=${cooldownOk} hasMetPlayer=${prev.hasMetPlayer}` +
         ` (tick=${tick} lastSpokeAt=${prev.lastSpokeAt})`,
       );
     }
 
     if (enteredNear && tick - prev.lastSpokeAt >= COOLDOWN_TICKS) {
+      const isFirstMeet = !prev.hasMetPlayer;
       const r = deterministicRand(seed, e.id, tick);
-      if (r < SPEAK_PROB[e.kind]) {
+      // First encounter always speaks; subsequent encounters use probability gate.
+      if (isFirstMeet || r < SPEAK_PROB[e.kind]) {
         const msgs = ENCOUNTER_MESSAGES[e.kind];
         const idx = (e.x * 7 + e.y * 13 + tick) % msgs.length;
         candidates.push({ kind: e.kind, msg: msgs[idx] });
-        // Record lastSpokeAt immediately so multiple candidates in the same
-        // call don't each update it independently.
-        nearState.set(e.id, { wasNear: isNearNow, lastSpokeAt: tick });
+        // Record lastSpokeAt and mark as met.
+        nearState.set(e.id, { wasNear: isNearNow, lastSpokeAt: tick, hasMetPlayer: true });
       }
     }
   }
