@@ -1,0 +1,609 @@
+/* =====================================================================
+   Root app — fills the viewport, no overflow.
+   100dvh accounts for iOS Safari dynamic toolbar height.
+   ===================================================================== */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;        /* fallback */
+  height: 100dvh;
+  padding: 0.25rem 0.5rem;
+  gap: 0.25rem;
+  overflow: hidden;
+}
+
+/* ---- Toolbar ---- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  /* Compact: reduce minimum height */
+  min-height: 36px;
+}
+
+.toolbar label {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+/* =====================================================================
+   Main content row
+   ===================================================================== */
+.main {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* =====================================================================
+   Map area — wraps GridView only. No D-pad here on mobile.
+   ===================================================================== */
+.map-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* fills .main on mobile; sizes to grid content on desktop */
+}
+
+/* ---- Grid wrapper (ResizeObserver target, inside GridView component) ---- */
+.grid-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* ---- Grid <pre> ---- */
+.grid-view {
+  font-family: 'Courier New', Courier, monospace;
+  color: #bbb;
+  background-color: #0a0a0a;
+  border: 1px solid #333;
+  padding: 0.3rem 0.5rem;
+  outline: none;
+  cursor: default;
+  white-space: pre;
+  user-select: none;
+  touch-action: none;
+}
+
+.grid-view:focus {
+  border-color: #555;
+}
+
+/* Hidden single-char span — measures char dimensions for tap-to-jump. */
+.char-measure {
+  font-family: 'Courier New', Courier, monospace;
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: pre;
+}
+
+/* =====================================================================
+   TouchPad (D-pad) — lives inside bp-dpad-col on mobile, no map overlay
+   ===================================================================== */
+.touchpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.touchpad-row {
+  display: flex;
+  gap: 3px;
+}
+
+.dpad-btn {
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1a1a1a;
+  border: 1px solid #555;
+  color: #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  transition: background-color 80ms, border-color 80ms;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.dpad-btn:active,
+.dpad-btn:hover {
+  background-color: #2e2e2e;
+  border-color: #888;
+}
+
+.dpad-select {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.dpad-select--flash {
+  background-color: #3a3a1a;
+  border-color: #aaaa44;
+  color: #eedd88;
+}
+
+/* =====================================================================
+   Inspector (desktop — right column)
+   ===================================================================== */
+.inspector-desktop-wrap {
+  min-width: 160px;
+  flex-shrink: 0;
+}
+
+.inspector {
+  min-width: 140px;
+  background-color: #0f0f0f;
+  border: 1px solid #333;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.inspector--collapsed {
+  padding: 0.3rem 0.5rem;
+}
+
+.inspector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.25rem;
+}
+
+.inspector--collapsed .inspector-header {
+  margin-bottom: 0.3rem;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.inspector-title {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.inspector-toggle {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 0.72rem;
+  padding: 0 0.2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.inspector-toggle:hover {
+  color: #999;
+  background: none;
+  border: none;
+}
+
+.inspector-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.79rem;
+  flex-wrap: wrap;
+}
+
+.ic-item { color: #bbb; white-space: nowrap; }
+.ic-item b { color: #ddd; font-weight: normal; }
+.ic-sep { color: #444; }
+
+.inspector table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.inspector th {
+  text-align: left;
+  color: #777;
+  font-weight: normal;
+  padding-right: 0.4rem;
+  padding-bottom: 0.18rem;
+}
+
+.inspector td {
+  color: #ddd;
+  padding-bottom: 0.18rem;
+}
+
+.legend {
+  margin-top: 0.6rem;
+  border-top: 1px solid #333;
+  padding-top: 0.35rem;
+}
+
+.legend h3 {
+  font-size: 0.78rem;
+  color: #777;
+  margin-bottom: 0.3rem;
+}
+
+.legend ul { list-style: none; padding: 0; }
+
+.legend li {
+  color: #aaa;
+  font-size: 0.79rem;
+  margin-bottom: 0.1rem;
+}
+
+.glyph { color: #ddd; margin-right: 0.35rem; }
+
+.hint {
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: #555;
+}
+
+/* =====================================================================
+   TILE COLOURS
+   ===================================================================== */
+.tile-water          { color: #4FC3F7; }
+.tile-rocky-mountain { color: #B0BEC5; }
+.tile-alpine         { color: #E0F7FA; }
+.tile-desert         { color: #FBC02D; }
+.tile-plains         { color: #9CCC65; }
+.tile-forest         { color: #2E7D32; }
+
+.tile-player {
+  color: #FF5252;
+  font-weight: bold;
+  background-color: rgba(255, 82, 82, 0.18);
+}
+
+.tile-highlight {
+  background-color: rgba(255, 255, 100, 0.15);
+  outline: 1px solid rgba(255, 255, 100, 0.4);
+}
+
+/* =====================================================================
+   ENTITY TILE COLOURS
+   ===================================================================== */
+.tile-entity           { font-weight: bold; }
+.tile-entity--goat     { color: #F5CBA7; }
+.tile-entity--bird     { color: #AED6F1; }
+.tile-entity--frog     { color: #A9DFBF; }
+.tile-entity--wanderer { color: #D7BDE2; }
+
+/* =====================================================================
+   ZONE TILE COLOURS
+   ===================================================================== */
+.tile-zone--sand          { color: #D4A76A; }
+.tile-zone--gravel        { color: #9E9E9E; }
+.tile-zone--dirt          { color: #A1887F; }
+.tile-zone--grass         { color: #7CB342; }
+.tile-zone--tall_grass    { color: #558B2F; }
+.tile-zone--rock          { color: #757575; }
+.tile-zone--cliff         { color: #B71C1C; font-weight: bold; }
+.tile-zone--shallow_water { color: #4FC3F7; }
+.tile-zone--mud           { color: #6D4C41; }
+.tile-zone--tree          { color: #2E7D32; font-weight: bold; }
+.tile-zone--reed          { color: #827717; }
+.tile-zone--snow          { color: #E1F5FE; }
+
+/* =====================================================================
+   MODE BADGE + ACTION BAR
+   ===================================================================== */
+.mode-badge {
+  font-size: 0.78rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+  border: 1px solid #333;
+  color: #aaa;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mode-badge--zone { border-color: #4a6; color: #8fce9a; background-color: #0f1f12; }
+
+.toolbar-sep {
+  width: 1px;
+  height: 20px;
+  background: #333;
+  flex-shrink: 0;
+  margin: 0 0.2rem;
+}
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #1a1a1a;
+  color: #ccc;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 28px;
+  touch-action: manipulation;
+  transition: background-color 80ms, border-color 80ms;
+}
+.action-btn:hover:not(:disabled) { background-color: #2a2a2a; border-color: #666; }
+.action-btn:disabled { opacity: 0.38; cursor: default; }
+
+.action-btn--enter {
+  border-color: #4a8;
+  color: #8fce9a;
+  background-color: #0f1f16;
+}
+.action-btn--enter:hover { background-color: #162b1e; border-color: #6bc; }
+
+.action-btn--back {
+  border-color: #86a;
+  color: #c9a0dc;
+  background-color: #1a1020;
+}
+.action-btn--back:hover { background-color: #221530; border-color: #a8c; }
+
+.action-depth {
+  font-size: 0.76rem;
+  color: #777;
+  padding: 0 0.25rem;
+  white-space: nowrap;
+}
+
+/* Mobile action bar inside BottomPanel */
+.bp-action {
+  flex-shrink: 0;
+  padding: 3px 6px;
+  border-bottom: 1px solid #1e1e1e;
+  background-color: #0d0d0d;
+}
+
+.bp-action .action-btn {
+  min-height: 34px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.82rem;
+}
+
+/* =====================================================================
+   CONSOLE LOG  — fills its container height
+   ===================================================================== */
+.console-log {
+  overflow-y: auto;
+  background-color: #050505;
+  padding: 0.25rem 0.5rem;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'NanumGothic', 'Courier New', Courier, monospace;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  scroll-behavior: smooth;
+  /* Height managed by parent flex/grid */
+  flex: 1;
+  min-height: 0;
+}
+
+/* Desktop-only console strip */
+.console-log.console-desktop {
+  flex: 0 0 5.5rem;
+  height: 5.5rem;
+  border: 1px solid #222;
+}
+
+.console-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.console-line--system    { color: #888; }
+.console-line--encounter { color: #C5E1A5; }  /* soft green — NPC/animal */
+.console-line--tick      { color: #546E7A; }  /* muted blue-grey */
+.console-line--info      { color: #80CBC4; }  /* teal */
+.console-line--narration { color: #8ab4b0; }  /* muted teal — world narration */
+
+.console-cursor {
+  color: #aaa;
+  animation: blink 0.8s step-start infinite;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* =====================================================================
+   BOTTOM PANEL  — mobile unified panel (Console/Inspector + D-pad)
+   ===================================================================== */
+.bottom-panel {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #0a0a0a;
+  border-top: 1px solid #333;
+  overflow: hidden;
+  /* height set by inline style from BottomPanel component */
+}
+
+/* Handle bar — draggable resize strip */
+.bp-handle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.6rem;
+  height: 36px;
+  flex-shrink: 0;
+  cursor: ns-resize;
+  user-select: none;
+  touch-action: none;
+  background-color: #111;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.bp-grip {
+  color: #444;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.bp-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', monospace;
+  font-size: 0.76rem;
+  overflow: hidden;
+}
+
+.bp-summary__item {
+  color: #bbb;
+  white-space: nowrap;
+}
+
+.bp-summary__sep {
+  color: #444;
+  flex-shrink: 0;
+}
+
+.bp-tabs {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.bp-tab {
+  background: none;
+  border: 1px solid #333;
+  color: #666;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', monospace;
+  transition: background-color 80ms, color 80ms;
+  touch-action: manipulation;
+}
+
+.bp-tab:hover       { background-color: #1e1e1e; color: #aaa; }
+.bp-tab--active     { border-color: #556; color: #ccc; background-color: #1a1a2a; }
+
+/* ---- Content grid: 2 columns ----------------------------------------- */
+.bp-content {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 156px;  /* left: console/inspector  right: D-pad */
+  overflow: hidden;
+}
+
+/* Left column: console log or inspector */
+.bp-left {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bp-left .console-log {
+  /* Override to fill the flex column */
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+.bp-inspector-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.2rem 0;
+}
+
+.bp-inspector-wrap .inspector {
+  border: none;
+  background: transparent;
+  min-width: 0;
+}
+
+/* Right column: D-pad */
+.bp-dpad-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid #1e1e1e;
+  padding: 4px 2px;
+  flex-shrink: 0;
+}
+
+/* D-pad inside panel: slightly smaller to fit 156px column comfortably */
+.bp-dpad-col .dpad-btn {
+  width: 46px;
+  height: 46px;
+  font-size: 1.1rem;
+}
+
+/* =====================================================================
+   DESKTOP  (≥ 901px)
+   ===================================================================== */
+@media (min-width: 901px) {
+  .bottom-panel { display: none; }
+}
+
+/* =====================================================================
+   MOBILE  (≤ 900px)
+   ===================================================================== */
+@media (max-width: 900px) {
+  .app {
+    padding: 0.2rem 0.3rem;
+    gap: 0.15rem;
+  }
+
+  .main {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .map-area {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .grid-wrap {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Hide desktop elements */
+  .inspector-desktop-wrap { display: none; }
+  .console-log.console-desktop { display: none; }
+
+  /* Tighter grid padding */
+  .grid-view {
+    padding: 0.15rem 0.25rem;
+    border-left: none;
+    border-right: none;
+  }
+
+  /* Compact toolbar */
+  input[type='number'] { width: 7.5em; }
+  button               { padding: 0.2rem 0.5rem; font-size: 0.82rem; }
+}

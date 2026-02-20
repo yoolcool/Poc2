@@ -1,0 +1,55 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+:root {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #111;
+  color: #ccc;
+}
+
+body {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  background-color: #222;
+  color: #ccc;
+  border: 1px solid #444;
+  padding: 0.4em 0.8em;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background-color: #333;
+  border-color: #888;
+}
+
+input[type='number'] {
+  background-color: #222;
+  color: #ccc;
+  border: 1px solid #444;
+  padding: 0.4em 0.6em;
+  font-family: inherit;
+  font-size: 0.9rem;
+  width: 12em;
+}
