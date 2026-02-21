@@ -1,15 +1,23 @@
 import type { Biome } from '../world/types';
 
-/** ASCII glyph rendered for each biome. */
+/**
+ * Dense glyphs per biome — chosen for maximum visual fill.
+ * Each character should "fill" its cell so the map looks solid.
+ */
 export const BIOME_CHAR: Record<Biome, string> = {
-  water:          '~',
-  rocky_mountain: '^',
-  alpine:         'A',
-  desert:         '.',
-  plains:         ',',
-  forest:         'T',
-  beach:          ':',
-  swamp:          '"',
+  water:          '≋',
+  rocky_mountain: '▲',
+  alpine:         '△',
+  desert:         '∴',
+  plains:         '░',
+  forest:         '♣',
+  beach:          '▒',
+  swamp:          '≈',
+  river:          '━',
+  lake:           '◉',
+  special:        '◈',
+  dense_forest:   '♠',
+  steppe:         '·',
 };
 
 /**
@@ -25,6 +33,11 @@ export const BIOME_CLASS: Record<Biome, string> = {
   forest:         'tile-forest',
   beach:          'tile-beach',
   swamp:          'tile-swamp',
+  river:          'tile-river',
+  lake:           'tile-lake',
+  special:        'tile-special',
+  dense_forest:   'tile-dense-forest',
+  steppe:         'tile-steppe',
 };
 
 /**

@@ -3,6 +3,8 @@ import { serializeOverworld } from './world/overworld';
 import type { Overworld, OverworldCell } from './world/types';
 import { runWorldGenV2 } from './world/gen/v2/pipeline';
 import type { WorldGenV2Result } from './world/gen/v2/types';
+import { runWorldGenV3 } from './world/gen/v3/pipeline';
+import type { WorldGenV3Result } from './world/gen/v3/types';
 import { spawnEntities, tickEntities, ENTITY_GLYPH } from './world/entities';
 import type { Entity } from './world/entities';
 import { updateProximity } from './world/simulation';
@@ -28,7 +30,7 @@ const TICK_INTERVAL_MS = 1000;
 
 export type MapLayer = 'biome' | 'height' | 'rivers';
 
-/** Build an Overworld + v2 raw data from the v2 pipeline. */
+/** Build an Overworld + v2 raw data from the v2 pipeline (legacy). */
 function buildWorldV2(seed: number): { world: Overworld; v2: WorldGenV2Result } {
   const v2 = runWorldGenV2(seed, { width: WORLD_WIDTH, height: WORLD_HEIGHT });
   const cells: OverworldCell[] = [];
@@ -42,6 +44,30 @@ function buildWorldV2(seed: number): { world: Overworld; v2: WorldGenV2Result } 
     }
   }
   return { world: { width: WORLD_WIDTH, height: WORLD_HEIGHT, cells }, v2 };
+}
+
+/** Build an Overworld from the v3 structure-driven pipeline. */
+function buildWorldV3(seed: number): { world: Overworld; v2: WorldGenV2Result } {
+  const v3 = runWorldGenV3(seed, { width: WORLD_WIDTH, height: WORLD_HEIGHT });
+  const cells: OverworldCell[] = [];
+  for (let y = 0; y < WORLD_HEIGHT; y++) {
+    for (let x = 0; x < WORLD_WIDTH; x++) {
+      cells.push({
+        height: v3.heightMap[y][x],
+        moisture: v3.moisture[y][x],
+        biome: v3.biomeMap[y][x],
+      });
+    }
+  }
+  // Wrap v3 result into v2-compatible shape so the rest of the app works unchanged
+  const v2Compat: WorldGenV2Result = {
+    heightMap: v3.heightMap,
+    riverMap: { river: v3.riverMask, lake: v3.lakeMask },
+    biomeMap: v3.biomeMap,
+    seaLevel: 0.25,
+    moisture: v3.moisture,
+  };
+  return { world: { width: WORLD_WIDTH, height: WORLD_HEIGHT, cells }, v2: v2Compat };
 }
 
 function simpleHash(s: string): number {
@@ -84,7 +110,7 @@ function heightClass(h: number): string {
 
 // ---- Initial build (run once) -------------------------------------------
 
-const initialBuild = buildWorldV2(INITIAL_SEED);
+const initialBuild = buildWorldV3(INITIAL_SEED);
 
 export default function App() {
   const [seed, setSeed]           = useState<number>(INITIAL_SEED);
@@ -142,7 +168,7 @@ export default function App() {
 
   // ---- Regenerate world ------------------------------------------------
   const regenerate = useCallback((newSeed: number) => {
-    const { world: w, v2 } = buildWorldV2(newSeed);
+    const { world: w, v2 } = buildWorldV3(newSeed);
     const ents = spawnEntities(newSeed, w);
     setSeed(newSeed);
     setWorld(w);
