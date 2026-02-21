@@ -255,16 +255,21 @@
 }
 
 /* =====================================================================
-   TILE COLOURS
+   TILE COLOURS — high-contrast palette for dense map readability
    ===================================================================== */
-.tile-water          { color: #4FC3F7; }
-.tile-rocky-mountain { color: #B0BEC5; }
-.tile-alpine         { color: #E0F7FA; }
-.tile-desert         { color: #FBC02D; }
-.tile-plains         { color: #9CCC65; }
-.tile-forest         { color: #2E7D32; }
-.tile-beach          { color: #FFE082; }
-.tile-swamp          { color: #6D8764; }
+.tile-water          { color: #1565C0; }
+.tile-rocky-mountain { color: #E0E0E0; font-weight: bold; }
+.tile-alpine         { color: #F5F5F5; font-weight: bold; }
+.tile-desert         { color: #D4A017; }
+.tile-plains         { color: #8BC34A; }
+.tile-forest         { color: #43A047; font-weight: bold; }
+.tile-beach          { color: #FFD54F; }
+.tile-swamp          { color: #4DB6AC; }
+.tile-river          { color: #00E5FF; font-weight: bold; }
+.tile-lake           { color: #29B6F6; font-weight: bold; }
+.tile-special        { color: #CE93D8; font-weight: bold; }
+.tile-dense-forest   { color: #1B5E20; font-weight: bold; }
+.tile-steppe         { color: #A1887F; }
 
 /* ---- Height layer ---- */
 .tile-h-deep   { color: #0D47A1; }

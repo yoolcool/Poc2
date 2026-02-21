@@ -13,14 +13,19 @@ type Props = {
 
 /** Legend entries: [cssClass, glyph, label] */
 const LEGEND: [string, string, string][] = [
-  ['tile-water',          '~', 'water'],
-  ['tile-beach',          ':', 'beach'],
-  ['tile-rocky-mountain', '^', 'rocky mountain'],
-  ['tile-alpine',         'A', 'alpine'],
-  ['tile-desert',         '.', 'desert'],
-  ['tile-plains',         ',', 'plains'],
-  ['tile-forest',         'T', 'forest'],
-  ['tile-swamp',          '"', 'swamp'],
+  ['tile-water',          '≋', 'ocean'],
+  ['tile-beach',          '▒', 'beach'],
+  ['tile-rocky-mountain', '▲', 'mountain'],
+  ['tile-alpine',         '△', 'alpine'],
+  ['tile-desert',         '∴', 'desert'],
+  ['tile-plains',         '░', 'plains'],
+  ['tile-forest',         '♣', 'forest'],
+  ['tile-dense-forest',   '♠', 'dense forest'],
+  ['tile-swamp',          '≈', 'swamp'],
+  ['tile-river',          '━', 'river'],
+  ['tile-lake',           '◉', 'lake'],
+  ['tile-special',        '◈', 'special zone'],
+  ['tile-steppe',         '·', 'steppe'],
   ['tile-player',         '@', 'cursor'],
 ];
 

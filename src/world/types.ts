@@ -7,7 +7,12 @@ export type Biome =
   | 'plains'
   | 'forest'
   | 'beach'
-  | 'swamp';
+  | 'swamp'
+  | 'river'
+  | 'lake'
+  | 'special'
+  | 'dense_forest'
+  | 'steppe';
 
 /** A single cell in the overworld grid */
 export type OverworldCell = {
