@@ -1,10 +1,8 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { serializeOverworld } from './world/overworld';
 import type { Overworld, OverworldCell } from './world/types';
-import { runWorldGenV2 } from './world/gen/v2/pipeline';
 import type { WorldGenV2Result } from './world/gen/v2/types';
 import { runWorldGenV3 } from './world/gen/v3/pipeline';
-import type { WorldGenV3Result } from './world/gen/v3/types';
 import { spawnEntities, tickEntities, ENTITY_GLYPH } from './world/entities';
 import type { Entity } from './world/entities';
 import { updateProximity } from './world/simulation';
@@ -29,22 +27,6 @@ const WORLD_HEIGHT = 40;
 const TICK_INTERVAL_MS = 1000;
 
 export type MapLayer = 'biome' | 'height' | 'rivers';
-
-/** Build an Overworld + v2 raw data from the v2 pipeline (legacy). */
-function buildWorldV2(seed: number): { world: Overworld; v2: WorldGenV2Result } {
-  const v2 = runWorldGenV2(seed, { width: WORLD_WIDTH, height: WORLD_HEIGHT });
-  const cells: OverworldCell[] = [];
-  for (let y = 0; y < WORLD_HEIGHT; y++) {
-    for (let x = 0; x < WORLD_WIDTH; x++) {
-      cells.push({
-        height: v2.heightMap[y][x],
-        moisture: v2.moisture[y][x],
-        biome: v2.biomeMap[y][x],
-      });
-    }
-  }
-  return { world: { width: WORLD_WIDTH, height: WORLD_HEIGHT, cells }, v2 };
-}
 
 /** Build an Overworld from the v3 structure-driven pipeline. */
 function buildWorldV3(seed: number): { world: Overworld; v2: WorldGenV2Result } {
